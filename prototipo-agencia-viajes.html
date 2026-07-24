@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rumbo — Prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ BASE / TOKENS ============ */
+:root{
+  --radius-s:6px; --radius-m:12px; --radius-l:20px;
+  --font-display:'Fraunces', serif;
+  --font-body:'Work Sans', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+  --shadow: 0 12px 32px -12px rgba(10,16,32,.35);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body); line-height:1.5; color:#1b2a4a;}
+img{max-width:100%; display:block;}
+button{font-family:inherit; cursor:pointer; border:none; background:none;}
+a{color:inherit; text-decoration:none;}
+ul{list-style:none;}
+input,select,textarea{font-family:inherit; font-size:1rem;}
+:focus-visible{outline:3px solid #E8A33D; outline-offset:2px;}
+[hidden]{display:none !important;}
+.container{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+/* ============ TEMA CLIENTE (sitio público) ============ */
+.tema-cliente{
+  --bg:#182747; --bg-alt:#101c38; --card:#1f3159; --card-border:#33456f;
+  --ink:#f4f1e8; --ink-dim:#b9c2d9;
+  --amber:#e8a33d; --teal:#4fb3ad;
+  background:var(--bg); color:var(--ink);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(79,179,173,.16), transparent 40%),
+    radial-gradient(circle at 88% 22%, rgba(232,163,61,.14), transparent 45%);
+}
+
+/* --- nav --- */
+.nav{position:sticky; top:0; z-index:40; backdrop-filter:blur(10px); background:rgba(16,28,56,.82); border-bottom:1px solid var(--card-border);}
+.nav-inner{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1180px; margin:0 auto;}
+.logo{font-family:var(--font-display); font-size:1.5rem; letter-spacing:.02em; display:flex; align-items:baseline; gap:6px;}
+.logo em{font-style:normal; color:var(--amber);}
+.nav-links{display:flex; gap:28px; font-size:.92rem; font-weight:500;}
+.nav-links a:hover{color:var(--amber);}
+.nav-cta{display:flex; align-items:center; gap:14px;}
+.btn{display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:999px; font-weight:600; font-size:.9rem; transition:.15s ease;}
+.btn-amber{background:var(--amber); color:#1b2a4a;}
+.btn-amber:hover{background:#f4b458; transform:translateY(-1px);}
+.btn-ghost{border:1px solid var(--card-border); color:var(--ink);}
+.btn-ghost:hover{border-color:var(--amber); color:var(--amber);}
+.btn-teal{background:var(--teal); color:#0d2320;}
+.btn-teal:hover{background:#63c4bf;}
+.btn-outline-dark{border:1px solid #1b2a4a; color:#1b2a4a;}
+.hamburger{display:none; font-size:1.4rem; color:var(--ink);}
+
+/* --- hero --- */
+.hero{padding:96px 24px 72px; text-align:center; position:relative;}
+.hero .route{font-family:var(--font-mono); font-size:.8rem; letter-spacing:.18em; color:var(--teal); text-transform:uppercase; margin-bottom:18px;}
+.hero h1{font-family:var(--font-display); font-size:clamp(2.4rem,5vw,4.2rem); font-weight:600; max-width:820px; margin:0 auto 20px; line-height:1.08;}
+.hero h1 i{font-style:italic; color:var(--amber);}
+.hero p{max-width:520px; margin:0 auto 34px; color:var(--ink-dim); font-size:1.05rem;}
+.hero-actions{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+.hero-dashline{max-width:640px; margin:56px auto 0; border-top:2px dashed var(--card-border); position:relative;}
+.hero-dashline span{position:absolute; top:-11px; background:var(--bg); padding:0 10px; font-family:var(--font-mono); font-size:.75rem; color:var(--ink-dim);}
+.hero-dashline .p1{left:0;} .hero-dashline .p2{right:0;}
+
+/* --- section heads --- */
+.section-head{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:32px; flex-wrap:wrap;}
+.eyebrow{font-family:var(--font-mono); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; color:var(--teal); margin-bottom:8px; display:block;}
+.section-head h2{font-family:var(--font-display); font-size:clamp(1.7rem,3vw,2.4rem); font-weight:600;}
+section{padding:64px 0;}
+
+/* --- ofertas (stamps) --- */
+.ofertas-scroll{display:flex; gap:18px; overflow-x:auto; padding-bottom:8px;}
+.stamp{flex:0 0 240px; background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-m); padding:22px; position:relative;}
+.stamp::before{content:"OFERTA"; font-family:var(--font-mono); font-size:.65rem; letter-spacing:.14em; color:var(--amber); border:1px dashed var(--amber); padding:3px 8px; border-radius:20px;}
+.stamp h3{font-family:var(--font-display); font-size:1.25rem; margin:14px 0 6px;}
+.stamp p{font-size:.85rem; color:var(--ink-dim); margin-bottom:14px;}
+.stamp .precio{font-family:var(--font-mono); font-size:1.1rem; color:var(--teal); font-weight:600;}
+
+/* --- filtros --- */
+.filtros{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:6px;}
+.filtros select{background:var(--card); border:1px solid var(--card-border); color:var(--ink); padding:10px 14px; border-radius:var(--radius-s);}
+
+/* --- boarding pass package cards --- */
+.grid-paquetes{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; margin-top:28px;}
+.ticket{background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-m); overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow); transition:.2s ease;}
+.ticket:hover{transform:translateY(-3px); border-color:var(--amber);}
+.ticket-top{padding:20px 20px 16px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.ticket-route{font-family:var(--font-mono); font-size:1.05rem; font-weight:600; color:var(--ink);}
+.ticket-route small{display:block; font-size:.68rem; color:var(--ink-dim); font-weight:400; letter-spacing:.08em; margin-top:2px;}
+.ticket-badge{font-family:var(--font-mono); font-size:.65rem; background:rgba(79,179,173,.18); color:var(--teal); padding:4px 9px; border-radius:20px; white-space:nowrap;}
+.ticket h3{font-family:var(--font-display); font-size:1.3rem; padding:0 20px 4px; font-weight:600;}
+.ticket-desc{padding:0 20px; color:var(--ink-dim); font-size:.86rem; flex-grow:1;}
+.ticket-perf{border-top:2px dashed var(--card-border); margin:18px 0 0; position:relative;}
+.ticket-perf::before,.ticket-perf::after{content:""; position:absolute; top:-9px; width:18px; height:18px; background:var(--bg); border-radius:50%;}
+.ticket-perf::before{left:-9px;} .ticket-perf::after{right:-9px;}
+.ticket-bottom{display:flex; align-items:center; justify-content:space-between; padding:16px 20px;}
+.ticket-precio{font-family:var(--font-mono); font-weight:600; color:var(--amber);}
+.ticket-precio small{display:block; font-family:var(--font-body); font-size:.68rem; color:var(--ink-dim); font-weight:400;}
+.ticket-ver{font-size:.85rem; font-weight:600; color:var(--teal);}
+.ticket-ver:hover{color:var(--amber);}
+
+/* --- novedades --- */
+.grid-novedades{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px;}
+.noticia{background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-m); padding:22px;}
+.noticia .fecha{font-family:var(--font-mono); font-size:.7rem; color:var(--teal); text-transform:uppercase; letter-spacing:.1em;}
+.noticia h3{font-family:var(--font-display); font-size:1.2rem; margin:10px 0 8px;}
+.noticia p{color:var(--ink-dim); font-size:.88rem;}
+
+/* --- contacto --- */
+.contacto-box{background:var(--card); border:1px solid var(--card-border); border-radius:var(--radius-l); padding:40px; display:grid; grid-template-columns:1fr 1.2fr; gap:40px;}
+.contacto-info h2{font-family:var(--font-display); font-size:1.8rem; margin-bottom:14px;}
+.contacto-info p{color:var(--ink-dim); margin-bottom:22px; font-size:.92rem;}
+.contacto-info ul li{font-size:.88rem; margin-bottom:10px; display:flex; gap:10px;}
+.form-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+.field label{display:block; font-size:.78rem; margin-bottom:6px; color:var(--ink-dim);}
+.field input, .field select, .field textarea{width:100%; padding:11px 13px; border-radius:var(--radius-s); border:1px solid var(--card-border); background:var(--bg-alt); color:var(--ink);}
+.field textarea{resize:vertical; min-height:90px;}
+#chip-paquete-relacionado{display:none; align-items:center; gap:8px; font-family:var(--font-mono); font-size:.78rem; background:rgba(232,163,61,.14); color:var(--amber); padding:8px 12px; border-radius:var(--radius-s); margin-bottom:14px;}
+#chip-paquete-relacionado button{color:var(--amber); font-weight:700;}
+
+/* --- footer --- */
+footer{border-top:1px solid var(--card-border); padding:32px 0; text-align:center; color:var(--ink-dim); font-size:.82rem;}
+
+/* ============ MODAL PAQUETE (comparte tema oscuro) ============ */
+.modal-overlay{position:fixed; inset:0; background:rgba(8,13,26,.72); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;}
+.modal-box{background:#1f3159; color:#f4f1e8; border:1px solid #33456f; border-radius:var(--radius-l); max-width:640px; width:100%; max-height:88vh; overflow-y:auto; position:relative;}
+.modal-close{position:absolute; top:16px; right:16px; font-size:1.3rem; color:#b9c2d9; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
+.modal-close:hover{background:rgba(255,255,255,.08); color:#e8a33d;}
+.modal-hero{padding:34px 34px 0;}
+.modal-hero .route{font-family:var(--font-mono); font-size:.75rem; color:#4fb3ad; letter-spacing:.14em;}
+.modal-hero h2{font-family:var(--font-display); font-size:2rem; margin:10px 0 6px;}
+.modal-hero .precio-grande{font-family:var(--font-mono); color:#e8a33d; font-size:1.3rem; font-weight:600; margin-bottom:18px;}
+.modal-body{padding:0 34px 34px;}
+.modal-body h4{font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:#4fb3ad; margin:20px 0 10px;}
+.modal-body ul li{font-size:.9rem; padding:6px 0; border-bottom:1px dashed #33456f; display:flex; justify-content:space-between; gap:10px;}
+.modal-actions{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap;}
+
+/* ============ TEMA AGENTE (panel) ============ */
+.tema-agente{--pbg:#f4f6f3; --pcard:#ffffff; --pborder:#dfe4de; --pink:#182747; --pink-dim:#5c6a80; --pteal:#2f8f8b; --pamber:#c67f20;
+  min-height:100vh; display:flex; background:var(--pbg); color:var(--pink);}
+.sidebar{width:230px; flex-shrink:0; background:#101c38; color:#e6e9f2; padding:24px 16px; display:flex; flex-direction:column; gap:6px;}
+.sidebar .logo{color:#fff; padding:0 10px 22px;}
+.sidebar .logo em{color:#e8a33d; font-style:normal;}
+.side-link{display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:var(--radius-s); font-size:.9rem; font-weight:500; color:#b9c2d9;}
+.side-link:hover{background:rgba(255,255,255,.06); color:#fff;}
+.side-link.activo{background:#e8a33d; color:#1b2a4a; font-weight:600;}
+.side-link .badge{margin-left:auto; background:#4fb3ad; color:#0d2320; font-size:.68rem; padding:2px 7px; border-radius:20px; font-family:var(--font-mono);}
+.sidebar-foot{margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.1);}
+
+.panel-main{flex-grow:1; min-width:0; display:flex; flex-direction:column;}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:18px 32px; background:var(--pcard); border-bottom:1px solid var(--pborder);}
+.topbar h1{font-family:var(--font-display); font-size:1.5rem;}
+.topbar .agente-tag{display:flex; align-items:center; gap:10px; font-size:.85rem; color:var(--pink-dim);}
+.avatar{width:34px; height:34px; border-radius:50%; background:var(--pteal); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:.85rem;}
+
+.pantalla{padding:28px 32px; overflow-y:auto;}
+.pantalla-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; flex-wrap:wrap; gap:12px;}
+.pantalla-head h2{font-family:var(--font-display); font-size:1.5rem;}
+.pantalla-head p.sub{color:var(--pink-dim); font-size:.85rem; margin-top:4px;}
+
+/* bandeja */
+.bandeja-layout{display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:flex-start;}
+.msg-list{background:var(--pcard); border:1px solid var(--pborder); border-radius:var(--radius-m); max-height:70vh; overflow-y:auto;}
+.msg-item{padding:16px 18px; border-bottom:1px solid var(--pborder); display:flex; flex-direction:column; gap:4px;}
+.msg-item:hover{background:#f9faf8;}
+.msg-item.activo{background:#fdf3e3; border-left:3px solid var(--pamber);}
+.msg-top{display:flex; justify-content:space-between; font-size:.85rem; font-weight:600;}
+.msg-top time{font-weight:400; font-size:.72rem; color:var(--pink-dim); font-family:var(--font-mono);}
+.msg-preview{font-size:.8rem; color:var(--pink-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.estado-pill{font-size:.65rem; font-family:var(--font-mono); padding:2px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.05em; width:fit-content;}
+.estado-nuevo{background:#fdecec; color:#b13d3d;}
+.estado-gestion{background:#fdf3e3; color:#9a6512;}
+.estado-cotizado{background:#e6f3f2; color:#1f6f6b;}
+.estado-cerrado{background:#eceef0; color:#5c6a80;}
+.msg-detail{background:var(--pcard); border:1px solid var(--pborder); border-radius:var(--radius-m); padding:26px; min-height:340px;}
+.msg-detail-empty{color:var(--pink-dim); text-align:center; padding:80px 20px; font-size:.9rem;}
+.detail-row{display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap;}
+.detail-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; padding-top:18px; border-top:1px solid var(--pborder);}
+select.estado-select{padding:9px 12px; border-radius:var(--radius-s); border:1px solid var(--pborder);}
+
+/* tablas */
+table{width:100%; border-collapse:collapse; background:var(--pcard); border:1px solid var(--pborder); border-radius:var(--radius-m); overflow:hidden;}
+th,td{text-align:left; padding:13px 16px; font-size:.87rem; border-bottom:1px solid var(--pborder);}
+th{background:#f9faf8; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--pink-dim);}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#fbfaf5; cursor:pointer;}
+.mini-btn{font-size:.78rem; padding:6px 12px; border-radius:20px; border:1px solid var(--pborder); font-weight:600;}
+.mini-btn:hover{border-color:var(--pamber); color:var(--pamber);}
+.mini-btn.peligro:hover{border-color:#b13d3d; color:#b13d3d;}
+.chk-publicado{width:18px; height:18px;}
+
+/* agenda */
+.agenda-list{display:flex; flex-direction:column; gap:12px;}
+.agenda-item{background:var(--pcard); border:1px solid var(--pborder); border-left:4px solid var(--pteal); border-radius:var(--radius-s); padding:16px 20px; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
+.agenda-fecha{font-family:var(--font-mono); font-size:.82rem; color:var(--pteal); font-weight:600; min-width:110px;}
+.agenda-item h4{font-size:.95rem;}
+.agenda-item p{font-size:.8rem; color:var(--pink-dim);}
+
+/* form inline panel */
+.panel-form{background:var(--pcard); border:1px solid var(--pborder); border-radius:var(--radius-m); padding:22px; margin-bottom:22px;}
+.panel-form .form-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:12px;}
+.panel-form .field label{font-size:.75rem; color:var(--pink-dim); display:block; margin-bottom:5px;}
+.panel-form .field input, .panel-form .field select, .panel-form .field textarea{width:100%; padding:9px 11px; border-radius:var(--radius-s); border:1px solid var(--pborder);}
+
+.tabs-mini{display:flex; gap:8px; margin-bottom:20px;}
+.tab-mini{padding:8px 16px; border-radius:20px; font-size:.82rem; font-weight:600; border:1px solid var(--pborder); color:var(--pink-dim);}
+.tab-mini.activo{background:var(--pink); color:#fff; border-color:var(--pink);}
+
+.card-lista{display:flex; justify-content:space-between; align-items:center; background:var(--pcard); border:1px solid var(--pborder); border-radius:var(--radius-s); padding:14px 18px; margin-bottom:10px;}
+.card-lista h4{font-size:.92rem;}
+.card-lista p{font-size:.78rem; color:var(--pink-dim);}
+
+.toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:#1b2a4a; color:#fff; padding:14px 22px; border-radius:999px; font-size:.88rem; z-index:200; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px;}
+.toast.exito::before{content:"✓"; background:#4fb3ad; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem;}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:860px){
+  .nav-links{display:none;}
+  .hamburger{display:block;}
+  .contacto-box{grid-template-columns:1fr;}
+  .bandeja-layout{grid-template-columns:1fr;}
+  .tema-agente{flex-direction:column;}
+  .sidebar{width:100%; flex-direction:row; overflow-x:auto; padding:12px;}
+  .sidebar-foot{display:none;}
+  .side-link{white-space:nowrap;}
+  .modal-hero, .modal-body{padding-left:22px; padding-right:22px;}
+}
+@media (max-width:520px){
+  .form-row{grid-template-columns:1fr;}
+  .pantalla{padding:20px 16px;}
+  .topbar{padding:14px 18px;}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; scroll-behavior:auto !important;}}
+</style>
+</head>
+<body>
+
+<!-- ======================================================= -->
+<!-- VISTA CLIENTE (sitio público)                            -->
+<!-- ======================================================= -->
+<div id="vista-cliente" class="tema-cliente">
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo">Rumbo<em>.</em></div>
+      <div class="nav-links">
+        <a href="#catalogo">Paquetes</a>
+        <a href="#ofertas">Ofertas</a>
+        <a href="#novedades">Novedades</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <div class="nav-cta">
+        <button class="btn btn-ghost" id="btn-ir-agente">Panel de agente</button>
+        <a href="#contacto" class="btn btn-amber">Cotizar viaje</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="route">BUE → EN CUALQUIER LUGAR</div>
+    <h1>Armamos el viaje <i>que todavía no sabías</i> que querías hacer</h1>
+    <p>Paquetes armados y a medida, con un agente real acompañándote antes, durante y después del viaje.</p>
+    <div class="hero-actions">
+      <a href="#catalogo" class="btn btn-amber">Ver paquetes</a>
+      <a href="#contacto" class="btn btn-ghost">Quiero un viaje a medida</a>
+    </div>
+    <div class="hero-dashline"><span class="p1">SALIDA: HOY</span><span class="p2">REGRESO: CUANDO QUIERAS</span></div>
+  </header>
+
+  <section id="ofertas">
+    <div class="container">
+      <div class="section-head">
+        <div><span class="eyebrow">Vigencia limitada</span><h2>Ofertas de la semana</h2></div>
+      </div>
+      <div class="ofertas-scroll" id="lista-ofertas"></div>
+    </div>
+  </section>
+
+  <section id="catalogo">
+    <div class="container">
+      <div class="section-head">
+        <div><span class="eyebrow">Catálogo</span><h2>Paquetes disponibles</h2></div>
+      </div>
+      <div class="filtros">
+        <select id="filtro-destino"><option value="">Todos los destinos</option></select>
+        <select id="filtro-precio">
+          <option value="">Cualquier precio</option>
+          <option value="1000">Hasta USD 1000</option>
+          <option value="1800">Hasta USD 1800</option>
+          <option value="99999">Más de USD 1800</option>
+        </select>
+      </div>
+      <div class="grid-paquetes" id="grid-paquetes"></div>
+    </div>
+  </section>
+
+  <section id="novedades">
+    <div class="container">
+      <div class="section-head">
+        <div><span class="eyebrow">Bitácora</span><h2>Novedades</h2></div>
+      </div>
+      <div class="grid-novedades" id="grid-novedades"></div>
+    </div>
+  </section>
+
+  <section id="contacto">
+    <div class="container">
+      <div class="contacto-box">
+        <div class="contacto-info">
+          <h2>Contanos tu viaje</h2>
+          <p>Dejanos tus datos y un agente te responde con una propuesta a medida. También podés escribirnos directo.</p>
+          <ul>
+            <li>✉️ hola@rumbo.travel</li>
+            <li>📞 +54 351 000-0000</li>
+            <li>📍 Córdoba, Argentina</li>
+          </ul>
+        </div>
+        <form id="form-contacto">
+          <div id="chip-paquete-relacionado"><span id="chip-texto"></span><button type="button" id="chip-quitar">✕</button></div>
+          <div class="form-row">
+            <div class="field"><label>Nombre y apellido</label><input required id="c-nombre" type="text" placeholder="Ana Torres"></div>
+            <div class="field"><label>Email</label><input required id="c-email" type="email" placeholder="ana@mail.com"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Teléfono</label><input id="c-telefono" type="tel" placeholder="+54 9 ..."></div>
+            <div class="field"><label>Tipo de consulta</label>
+              <select id="c-tipo"><option>Cotización</option><option>Consulta general</option><option>Viaje a medida</option></select>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:14px;"><label>Contanos qué tenés en mente</label>
+            <textarea id="c-mensaje" placeholder="Fechas, cantidad de personas, presupuesto aproximado..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-amber" style="width:100%; justify-content:center;">Enviar consulta</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">© 2026 Rumbo Viajes — Prototipo de validación funcional, sin fines de producción.</div>
+  </footer>
+</div>
+
+<!-- ======================================================= -->
+<!-- VISTA AGENTE (panel privado)                             -->
+<!-- ======================================================= -->
+<div id="vista-agente" class="tema-agente" hidden>
+  <aside class="sidebar">
+    <div class="logo">Rumbo<em>.</em></div>
+    <button class="side-link activo" data-pantalla="bandeja">💬 Bandeja <span class="badge" id="badge-mensajes">0</span></button>
+    <button class="side-link" data-pantalla="clientes">👤 Clientes</button>
+    <button class="side-link" data-pantalla="agenda">🗓️ Agenda</button>
+    <button class="side-link" data-pantalla="paquetes">🧳 Paquetes</button>
+    <button class="side-link" data-pantalla="contenido">📰 Ofertas y novedades</button>
+    <div class="sidebar-foot">
+      <button class="side-link" id="btn-ir-cliente">← Ver sitio público</button>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="topbar">
+      <h1 id="titulo-pantalla">Bandeja de mensajes</h1>
+      <div class="agente-tag"><div class="avatar">MJ</div> María José · Agente</div>
+    </div>
+
+    <!-- BANDEJA -->
+    <section class="pantalla" id="pantalla-bandeja">
+      <div class="pantalla-head"><div><p class="sub">Consultas recibidas desde el sitio público, en tiempo real.</p></div></div>
+      <div class="bandeja-layout">
+        <div class="msg-list" id="msg-list"></div>
+        <div class="msg-detail" id="msg-detail"><div class="msg-detail-empty">Elegí un mensaje de la lista para ver el detalle.</div></div>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section class="pantalla" id="pantalla-clientes" hidden>
+      <div class="pantalla-head">
+        <div><p class="sub">Contactos y viajeros con los que ya trabajaste.</p></div>
+        <button class="btn btn-amber" id="btn-nuevo-cliente">+ Nuevo cliente</button>
+      </div>
+      <div class="panel-form" id="form-nuevo-cliente" hidden>
+        <div class="form-row">
+          <div class="field"><label>Nombre</label><input id="nc-nombre" type="text"></div>
+          <div class="field"><label>Email</label><input id="nc-email" type="email"></div>
+          <div class="field"><label>Teléfono</label><input id="nc-telefono" type="tel"></div>
+        </div>
+        <div class="field" style="margin-bottom:14px;"><label>Notas</label><input id="nc-notas" type="text" placeholder="Preferencias, origen del contacto..."></div>
+        <button class="btn btn-teal" id="btn-guardar-cliente">Guardar cliente</button>
+      </div>
+      <table>
+        <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Notas</th></tr></thead>
+        <tbody id="tabla-clientes"></tbody>
+      </table>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="pantalla" id="pantalla-agenda" hidden>
+      <div class="pantalla-head">
+        <div><p class="sub">Próximas salidas y vencimientos a seguir.</p></div>
+        <button class="btn btn-amber" id="btn-nueva-reserva">+ Nuevo evento</button>
+      </div>
+      <div class="panel-form" id="form-nueva-reserva" hidden>
+        <div class="form-row">
+          <div class="field"><label>Cliente</label><input id="nr-cliente" type="text" placeholder="Nombre del cliente"></div>
+          <div class="field"><label>Descripción</label><input id="nr-desc" type="text" placeholder="Ej: Salida grupo Cusco"></div>
+          <div class="field"><label>Fecha</label><input id="nr-fecha" type="date"></div>
+        </div>
+        <button class="btn btn-teal" id="btn-guardar-reserva">Agregar a la agenda</button>
+      </div>
+      <div class="agenda-list" id="lista-agenda"></div>
+    </section>
+
+    <!-- PAQUETES -->
+    <section class="pantalla" id="pantalla-paquetes" hidden>
+      <div class="pantalla-head">
+        <div><p class="sub">Publicá paquetes de catálogo o armá uno a medida para un cliente.</p></div>
+        <button class="btn btn-amber" id="btn-nuevo-paquete">+ Nuevo paquete</button>
+      </div>
+      <div class="panel-form" id="form-nuevo-paquete" hidden>
+        <div class="form-row">
+          <div class="field"><label>Destino</label><input id="np-destino" type="text" placeholder="Ej: Bariloche"></div>
+          <div class="field"><label>Código de ruta</label><input id="np-ruta" type="text" placeholder="Ej: COR → BRC"></div>
+          <div class="field"><label>Precio (USD)</label><input id="np-precio" type="number" placeholder="1200"></div>
+          <div class="field"><label>Noches</label><input id="np-noches" type="number" placeholder="5"></div>
+        </div>
+        <div class="field" style="margin-bottom:14px;"><label>Descripción breve</label><input id="np-desc" type="text" placeholder="Qué incluye, para quién es..."></div>
+        <button class="btn btn-teal" id="btn-guardar-paquete">Publicar paquete</button>
+      </div>
+      <table>
+        <thead><tr><th>Destino</th><th>Ruta</th><th>Precio</th><th>Publicado</th><th></th></tr></thead>
+        <tbody id="tabla-paquetes"></tbody>
+      </table>
+    </section>
+
+    <!-- CONTENIDO (ofertas / novedades) -->
+    <section class="pantalla" id="pantalla-contenido" hidden>
+      <div class="pantalla-head"><div><p class="sub">Lo que se muestra en la home del sitio público.</p></div></div>
+      <div class="tabs-mini">
+        <button class="tab-mini activo" data-tab="ofertas">Ofertas</button>
+        <button class="tab-mini" data-tab="novedades">Novedades</button>
+      </div>
+      <div id="tab-ofertas">
+        <div class="panel-form">
+          <div class="form-row">
+            <div class="field"><label>Título</label><input id="of-titulo" type="text"></div>
+            <div class="field"><label>Detalle</label><input id="of-detalle" type="text"></div>
+            <div class="field"><label>Precio (USD)</label><input id="of-precio" type="number"></div>
+          </div>
+          <button class="btn btn-teal" id="btn-agregar-oferta">+ Agregar oferta</button>
+        </div>
+        <div id="lista-ofertas-admin"></div>
+      </div>
+      <div id="tab-novedades" hidden>
+        <div class="panel-form">
+          <div class="form-row">
+            <div class="field"><label>Título</label><input id="nv-titulo" type="text"></div>
+            <div class="field"><label>Copete</label><input id="nv-copete" type="text"></div>
+          </div>
+          <button class="btn btn-teal" id="btn-agregar-novedad">+ Agregar novedad</button>
+        </div>
+        <div id="lista-novedades-admin"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL PAQUETE (vista cliente) -->
+<div class="modal-overlay" id="modal-paquete" hidden>
+  <div class="modal-box">
+    <button class="modal-close" id="cerrar-modal-paquete">✕</button>
+    <div class="modal-hero">
+      <div class="route" id="mp-ruta"></div>
+      <h2 id="mp-titulo"></h2>
+      <div class="precio-grande" id="mp-precio"></div>
+    </div>
+    <div class="modal-body">
+      <p id="mp-desc" style="color:#b9c2d9; font-size:.92rem;"></p>
+      <h4>Incluye</h4>
+      <ul id="mp-incluye"></ul>
+      <div class="modal-actions">
+        <button class="btn btn-amber" id="mp-cotizar">Cotizar este paquete</button>
+        <a class="btn btn-ghost" id="mp-whatsapp" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast exito" id="toast" hidden></div>
+
+<script>
+/* ============================================================
+   ESTADO CENTRAL (simula la base de datos durante la demo)
+   ============================================================ */
+const state = {
+  paquetes: [
+    {id:1, destino:"Cusco", ruta:"BUE → CUZ", precio:1450, noches:6, desc:"Machu Picchu, Valle Sagrado y ciudad histórica, con guía en español.", publicado:true, incluye:["Vuelos ida y vuelta","5 noches de hotel 3★","Tren a Machu Picchu","Traslados aeropuerto-hotel"]},
+    {id:2, destino:"Bariloche", ruta:"COR → BRC", precio:980, noches:4, desc:"Escapada de montaña con circuito chico y opción de esquí.", publicado:true, incluye:["Vuelos ida y vuelta","3 noches de hotel","Excursión circuito chico"]},
+    {id:3, destino:"Río de Janeiro", ruta:"BUE → GIG", precio:1120, noches:5, desc:"Playa, Pan de Azúcar y Cristo Redentor con traslados incluidos.", publicado:true, incluye:["Vuelos ida y vuelta","4 noches frente al mar","Excursión Pan de Azúcar"]},
+    {id:4, destino:"Cancún", ruta:"BUE → CUN", precio:1890, noches:7, desc:"All inclusive frente al Caribe, ideal para desconectar en pareja.", publicado:true, incluye:["Vuelos ida y vuelta","6 noches all inclusive","Traslados privados"]},
+  ],
+  ofertas: [
+    {id:1, titulo:"Cusco 6 noches", detalle:"Salidas de agosto con 20% off", precio:1160},
+    {id:2, titulo:"Bariloche invierno", detalle:"Última semana con nieve garantizada", precio:820},
+  ],
+  novedades: [
+    {id:1, fecha:"18 jul 2026", titulo:"Nueva ruta directa a Cusco", copete:"Sumamos vuelos directos desde Buenos Aires, sin escalas en Lima."},
+    {id:2, fecha:"02 jul 2026", titulo:"Guía: qué llevar a la Patagonia en invierno", copete:"Armamos una lista con lo esencial para el frío del sur."},
+  ],
+  mensajes: [
+    {id:1, nombre:"Lucía Fernández", email:"lucia.f@mail.com", telefono:"+54 9 351 555-1122", tipo:"Cotización", paquete:"Cusco", mensaje:"Somos 2 personas, queremos viajar en septiembre. ¿Tienen disponibilidad?", fecha:"22 jul", estado:"nuevo"},
+    {id:2, nombre:"Martín Paz", email:"martin.paz@mail.com", telefono:"+54 9 011 444-3321", tipo:"Viaje a medida", paquete:null, mensaje:"Quiero armar un viaje a Europa de 15 días para 4 personas, con buen presupuesto.", fecha:"21 jul", estado:"gestion"},
+  ],
+  clientes: [
+    {id:1, nombre:"Carla Gómez", email:"carla.gomez@mail.com", telefono:"+54 9 351 222-1010", notas:"Viaja siempre con familia, prefiere all-inclusive."},
+  ],
+  agenda: [
+    {id:1, cliente:"Carla Gómez", desc:"Salida familiar a Cancún", fecha:"2026-08-14"},
+    {id:2, cliente:"Grupo corporativo Neuquén", desc:"Vencimiento de seña — Bariloche", fecha:"2026-07-30"},
+  ],
+  contadorId:100,
+  paqueteSeleccionadoParaContacto:null,
+};
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function nuevoId(){ state.contadorId += 1; return state.contadorId; }
+function mostrarToast(texto){
+  const t = document.getElementById('toast');
+  t.textContent = texto;
+  t.hidden = false;
+  clearTimeout(mostrarToast._h);
+  mostrarToast._h = setTimeout(()=> t.hidden = true, 3200);
+}
+function iniciales(nombre){
+  return nombre.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+}
+
+/* ============================================================
+   VISTA CLIENTE — render
+   ============================================================ */
+function renderOfertas(){
+  const cont = document.getElementById('lista-ofertas');
+  cont.innerHTML = state.ofertas.map(o => `
+    <div class="stamp">
+      <h3>${o.titulo}</h3>
+      <p>${o.detalle}</p>
+      <div class="precio">USD ${o.precio}</div>
+    </div>
+  `).join('') || '<p style="color:var(--ink-dim)">No hay ofertas activas por el momento.</p>';
+}
+
+function renderFiltroDestinos(){
+  const sel = document.getElementById('filtro-destino');
+  const actuales = new Set(Array.from(sel.options).map(o=>o.value));
+  state.paquetes.forEach(p=>{
+    if(!actuales.has(p.destino)){
+      const opt = document.createElement('option');
+      opt.value = p.destino; opt.textContent = p.destino;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function renderPaquetes(){
+  const grid = document.getElementById('grid-paquetes');
+  const destino = document.getElementById('filtro-destino').value;
+  const precioMax = document.getElementById('filtro-precio').value;
+  let lista = state.paquetes.filter(p=>p.publicado);
+  if(destino) lista = lista.filter(p=>p.destino === destino);
+  if(precioMax) lista = lista.filter(p=>p.precio <= Number(precioMax));
+
+  grid.innerHTML = lista.map(p => `
+    <div class="ticket">
+      <div class="ticket-top">
+        <div class="ticket-route">${p.ruta}<small>${p.noches} noches</small></div>
+        <div class="ticket-badge">USD ${p.precio}</div>
+      </div>
+      <h3>${p.destino}</h3>
+      <p class="ticket-desc">${p.desc}</p>
+      <div class="ticket-perf"></div>
+      <div class="ticket-bottom">
+        <div class="ticket-precio">USD ${p.precio}<small>por persona</small></div>
+        <button class="ticket-ver" data-ver-paquete="${p.id}">Ver detalle →</button>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--ink-dim)">No hay paquetes que coincidan con ese filtro.</p>';
+}
+
+function renderNovedades(){
+  const grid = document.getElementById('grid-novedades');
+  grid.innerHTML = state.novedades.map(n => `
+    <article class="noticia">
+      <div class="fecha">${n.fecha}</div>
+      <h3>${n.titulo}</h3>
+      <p>${n.copete}</p>
+    </article>
+  `).join('');
+}
+
+function abrirModalPaquete(id){
+  const p = state.paquetes.find(x=>x.id === id);
+  if(!p) return;
+  document.getElementById('mp-ruta').textContent = p.ruta;
+  document.getElementById('mp-titulo').textContent = p.destino;
+  document.getElementById('mp-precio').textContent = `USD ${p.precio} por persona · ${p.noches} noches`;
+  document.getElementById('mp-desc').textContent = p.desc;
+  document.getElementById('mp-incluye').innerHTML = p.incluye.map(i=>`<li>${i}<span>✓</span></li>`).join('');
+  document.getElementById('mp-whatsapp').href = `https://wa.me/5493510000000?text=${encodeURIComponent('Hola! Quiero consultar por el paquete a '+p.destino)}`;
+  state.paqueteSeleccionadoParaContacto = p;
+  document.getElementById('modal-paquete').hidden = false;
+}
+
+function cerrarModalPaquete(){ document.getElementById('modal-paquete').hidden = true; }
+
+function prefillContactoConPaquete(p){
+  const chip = document.getElementById('chip-paquete-relacionado');
+  document.getElementById('chip-texto').textContent = `Consultando por: ${p.destino}`;
+  chip.style.display = 'flex';
+  document.getElementById('c-tipo').value = 'Cotización';
+}
+
+/* ============================================================
+   VISTA CLIENTE — eventos
+   ============================================================ */
+document.getElementById('grid-paquetes').addEventListener('click', e=>{
+  const btn = e.target.closest('[data-ver-paquete]');
+  if(btn) abrirModalPaquete(Number(btn.dataset.verPaquete));
+});
+document.getElementById('cerrar-modal-paquete').addEventListener('click', cerrarModalPaquete);
+document.getElementById('modal-paquete').addEventListener('click', e=>{ if(e.target.id === 'modal-paquete') cerrarModalPaquete(); });
+document.getElementById('mp-cotizar').addEventListener('click', ()=>{
+  prefillContactoConPaquete(state.paqueteSeleccionadoParaContacto);
+  cerrarModalPaquete();
+  document.getElementById('contacto').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('chip-quitar').addEventListener('click', ()=>{
+  document.getElementById('chip-paquete-relacionado').style.display = 'none';
+  state.paqueteSeleccionadoParaContacto = null;
+});
+document.getElementById('filtro-destino').addEventListener('change', renderPaquetes);
+document.getElementById('filtro-precio').addEventListener('change', renderPaquetes);
+
+document.getElementById('form-contacto').addEventListener('submit', e=>{
+  e.preventDefault();
+  const nombre = document.getElementById('c-nombre').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  if(!nombre || !email) return;
+  const nuevoMensaje = {
+    id: nuevoId(),
+    nombre, email,
+    telefono: document.getElementById('c-telefono').value.trim(),
+    tipo: document.getElementById('c-tipo').value,
+    paquete: state.paqueteSeleccionadoParaContacto ? state.paqueteSeleccionadoParaContacto.destino : null,
+    mensaje: document.getElementById('c-mensaje').value.trim() || '(sin mensaje adicional)',
+    fecha: 'ahora',
+    estado: 'nuevo'
+  };
+  state.mensajes.unshift(nuevoMensaje);
+  renderBadgeMensajes();
+  renderBandeja();
+  e.target.reset();
+  document.getElementById('chip-paquete-relacionado').style.display = 'none';
+  state.paqueteSeleccionadoParaContacto = null;
+  mostrarToast('Consulta enviada. Un agente te va a contactar a la brevedad.');
+});
+
+/* ============================================================
+   NAVEGACIÓN ENTRE VISTA CLIENTE Y PANEL AGENTE
+   ============================================================ */
+function irAVistaAgente(){
+  document.getElementById('vista-cliente').hidden = true;
+  document.getElementById('vista-agente').hidden = false;
+  window.scrollTo(0,0);
+}
+function irAVistaCliente(){
+  document.getElementById('vista-agente').hidden = true;
+  document.getElementById('vista-cliente').hidden = false;
+  window.scrollTo(0,0);
+}
+document.getElementById('btn-ir-agente').addEventListener('click', irAVistaAgente);
+document.getElementById('btn-ir-cliente').addEventListener('click', irAVistaCliente);
+
+/* ============================================================
+   PANEL AGENTE — navegación interna
+   ============================================================ */
+const titulos = {bandeja:'Bandeja de mensajes', clientes:'Clientes', agenda:'Agenda de viajes', paquetes:'Paquetes', contenido:'Ofertas y novedades'};
+document.querySelectorAll('.side-link[data-pantalla]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.side-link[data-pantalla]').forEach(b=>b.classList.remove('activo'));
+    btn.classList.add('activo');
+    document.querySelectorAll('.pantalla').forEach(p=>p.hidden = true);
+    const destino = btn.dataset.pantalla;
+    document.getElementById('pantalla-'+destino).hidden = false;
+    document.getElementById('titulo-pantalla').textContent = titulos[destino];
+  });
+});
+
+/* ============================================================
+   PANEL AGENTE — Bandeja de mensajes
+   ============================================================ */
+let mensajeActivoId = null;
+
+function renderBadgeMensajes(){
+  const nuevos = state.mensajes.filter(m=>m.estado==='nuevo').length;
+  document.getElementById('badge-mensajes').textContent = nuevos;
+}
+
+function renderBandeja(){
+  const lista = document.getElementById('msg-list');
+  lista.innerHTML = state.mensajes.map(m => `
+    <div class="msg-item ${m.id===mensajeActivoId?'activo':''}" data-msg="${m.id}">
+      <div class="msg-top">${m.nombre}<time>${m.fecha}</time></div>
+      <div class="msg-preview">${m.tipo}${m.paquete ? ' · '+m.paquete : ''}</div>
+      <span class="estado-pill estado-${m.estado}">${etiquetaEstado(m.estado)}</span>
+    </div>
+  `).join('') || '<div style="padding:20px; color:var(--pink-dim); font-size:.85rem;">Todavía no llegaron consultas.</div>';
+  renderDetalleMensaje();
+}
+
+function etiquetaEstado(e){
+  return {nuevo:'Nuevo', gestion:'En gestión', cotizado:'Cotizado', cerrado:'Cerrado'}[e] || e;
+}
+
+function renderDetalleMensaje(){
+  const cont = document.getElementById('msg-detail');
+  const m = state.mensajes.find(x=>x.id === mensajeActivoId);
+  if(!m){
+    cont.innerHTML = '<div class="msg-detail-empty">Elegí un mensaje de la lista para ver el detalle.</div>';
+    return;
+  }
+  cont.innerHTML = `
+    <h3 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:6px;">${m.nombre}</h3>
+    <p style="color:var(--pink-dim); font-size:.85rem; margin-bottom:18px;">${m.tipo}${m.paquete ? ' · Paquete: '+m.paquete : ' · Viaje a medida'}</p>
+    <div class="detail-row">
+      <div><strong style="font-size:.8rem; color:var(--pink-dim);">Email</strong><div>${m.email}</div></div>
+      <div><strong style="font-size:.8rem; color:var(--pink-dim);">Teléfono</strong><div>${m.telefono || '—'}</div></div>
+    </div>
+    <div><strong style="font-size:.8rem; color:var(--pink-dim);">Mensaje</strong><p style="margin-top:6px;">${m.mensaje}</p></div>
+    <div class="detail-actions">
+      <select class="estado-select" id="cambiar-estado">
+        <option value="nuevo" ${m.estado==='nuevo'?'selected':''}>Nuevo</option>
+        <option value="gestion" ${m.estado==='gestion'?'selected':''}>En gestión</option>
+        <option value="cotizado" ${m.estado==='cotizado'?'selected':''}>Cotizado</option>
+        <option value="cerrado" ${m.estado==='cerrado'?'selected':''}>Cerrado</option>
+      </select>
+      <button class="btn btn-teal" id="btn-convertir-cliente">+ Convertir en cliente</button>
+      <button class="btn btn-amber" id="btn-armar-paquete-medida">Armar paquete a medida</button>
+    </div>
+  `;
+  document.getElementById('cambiar-estado').addEventListener('change', e=>{
+    m.estado = e.target.value;
+    renderBadgeMensajes();
+    renderBandeja();
+    mostrarToast('Estado actualizado a "'+etiquetaEstado(m.estado)+'"');
+  });
+  document.getElementById('btn-convertir-cliente').addEventListener('click', ()=>{
+    const yaExiste = state.clientes.some(c=>c.email === m.email);
+    if(!yaExiste){
+      state.clientes.push({id:nuevoId(), nombre:m.nombre, email:m.email, telefono:m.telefono, notas:'Originado desde consulta web.'});
+      renderTablaClientes();
+    }
+    mostrarToast(yaExiste ? 'Ese contacto ya es cliente.' : m.nombre+' fue agregado a Clientes.');
+  });
+  document.getElementById('btn-armar-paquete-medida').addEventListener('click', ()=>{
+    document.querySelector('.side-link[data-pantalla="paquetes"]').click();
+    document.getElementById('form-nuevo-paquete').hidden = false;
+    document.getElementById('np-desc').value = 'A medida para '+m.nombre+': '+m.mensaje;
+    document.getElementById('np-destino').focus();
+    mostrarToast('Completá los datos del paquete a medida.');
+  });
+}
+
+document.getElementById('msg-list').addEventListener('click', e=>{
+  const item = e.target.closest('[data-msg]');
+  if(!item) return;
+  mensajeActivoId = Number(item.dataset.msg);
+  renderBandeja();
+});
+
+/* ============================================================
+   PANEL AGENTE — Clientes
+   ============================================================ */
+function renderTablaClientes(){
+  const tbody = document.getElementById('tabla-clientes');
+  tbody.innerHTML = state.clientes.map(c => `
+    <tr><td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono||'—'}</td><td>${c.notas||'—'}</td></tr>
+  `).join('') || '<tr><td colspan="4" style="color:var(--pink-dim);">Todavía no cargaste clientes.</td></tr>';
+}
+document.getElementById('btn-nuevo-cliente').addEventListener('click', ()=>{
+  const f = document.getElementById('form-nuevo-cliente');
+  f.hidden = !f.hidden;
+});
+document.getElementById('btn-guardar-cliente').addEventListener('click', ()=>{
+  const nombre = document.getElementById('nc-nombre').value.trim();
+  if(!nombre) return mostrarToast('Ingresá al menos un nombre.');
+  state.clientes.push({
+    id:nuevoId(), nombre,
+    email: document.getElementById('nc-email').value.trim(),
+    telefono: document.getElementById('nc-telefono').value.trim(),
+    notas: document.getElementById('nc-notas').value.trim(),
+  });
+  ['nc-nombre','nc-email','nc-telefono','nc-notas'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('form-nuevo-cliente').hidden = true;
+  renderTablaClientes();
+  mostrarToast('Cliente guardado.');
+});
+
+/* ============================================================
+   PANEL AGENTE — Agenda
+   ============================================================ */
+function renderAgenda(){
+  const cont = document.getElementById('lista-agenda');
+  const ordenada = [...state.agenda].sort((a,b)=> new Date(a.fecha) - new Date(b.fecha));
+  cont.innerHTML = ordenada.map(a => `
+    <div class="agenda-item">
+      <div class="agenda-fecha">${formatearFecha(a.fecha)}</div>
+      <div style="flex-grow:1;"><h4>${a.desc}</h4><p>${a.cliente}</p></div>
+    </div>
+  `).join('') || '<p style="color:var(--pink-dim);">No hay eventos cargados en la agenda.</p>';
+}
+function formatearFecha(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('es-AR', {day:'2-digit', month:'short', year:'numeric'});
+}
+document.getElementById('btn-nueva-reserva').addEventListener('click', ()=>{
+  const f = document.getElementById('form-nueva-reserva');
+  f.hidden = !f.hidden;
+});
+document.getElementById('btn-guardar-reserva').addEventListener('click', ()=>{
+  const desc = document.getElementById('nr-desc').value.trim();
+  const fecha = document.getElementById('nr-fecha').value;
+  if(!desc || !fecha) return mostrarToast('Completá descripción y fecha.');
+  state.agenda.push({id:nuevoId(), cliente:document.getElementById('nr-cliente').value.trim()||'—', desc, fecha});
+  ['nr-cliente','nr-desc','nr-fecha'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('form-nueva-reserva').hidden = true;
+  renderAgenda();
+  mostrarToast('Evento agregado a la agenda.');
+});
+
+/* ============================================================
+   PANEL AGENTE — Paquetes
+   ============================================================ */
+function renderTablaPaquetes(){
+  const tbody = document.getElementById('tabla-paquetes');
+  tbody.innerHTML = state.paquetes.map(p => `
+    <tr>
+      <td>${p.destino}</td>
+      <td style="font-family:var(--font-mono); font-size:.8rem;">${p.ruta}</td>
+      <td>USD ${p.precio}</td>
+      <td><input type="checkbox" class="chk-publicado" data-toggle-pub="${p.id}" ${p.publicado?'checked':''}></td>
+      <td><button class="mini-btn peligro" data-borrar-paquete="${p.id}">Eliminar</button></td>
+    </tr>
+  `).join('');
+}
+document.getElementById('btn-nuevo-paquete').addEventListener('click', ()=>{
+  const f = document.getElementById('form-nuevo-paquete');
+  f.hidden = !f.hidden;
+});
+document.getElementById('btn-guardar-paquete').addEventListener('click', ()=>{
+  const destino = document.getElementById('np-destino').value.trim();
+  const precio = Number(document.getElementById('np-precio').value);
+  if(!destino || !precio) return mostrarToast('Completá al menos destino y precio.');
+  state.paquetes.push({
+    id: nuevoId(), destino,
+    ruta: document.getElementById('np-ruta').value.trim() || '— → —',
+    precio,
+    noches: Number(document.getElementById('np-noches').value) || 1,
+    desc: document.getElementById('np-desc').value.trim() || 'Paquete armado por el agente.',
+    publicado: true,
+    incluye: ['A definir con el cliente']
+  });
+  ['np-destino','np-ruta','np-precio','np-noches','np-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('form-nuevo-paquete').hidden = true;
+  renderTablaPaquetes(); renderPaquetes(); renderFiltroDestinos();
+  mostrarToast('Paquete publicado en el sitio.');
+});
+document.getElementById('tabla-paquetes').addEventListener('click', e=>{
+  const del = e.target.closest('[data-borrar-paquete]');
+  if(del){
+    state.paquetes = state.paquetes.filter(p=>p.id !== Number(del.dataset.borrarPaquete));
+    renderTablaPaquetes(); renderPaquetes();
+  }
+});
+document.getElementById('tabla-paquetes').addEventListener('change', e=>{
+  const chk = e.target.closest('[data-toggle-pub]');
+  if(chk){
+    const p = state.paquetes.find(x=>x.id === Number(chk.dataset.togglePub));
+    p.publicado = chk.checked;
+    renderPaquetes();
+    mostrarToast(p.publicado ? p.destino+' ahora es visible en el sitio.' : p.destino+' se ocultó del sitio.');
+  }
+});
+
+/* ============================================================
+   PANEL AGENTE — Contenido (ofertas / novedades)
+   ============================================================ */
+document.querySelectorAll('.tab-mini').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-mini').forEach(t=>t.classList.remove('activo'));
+    tab.classList.add('activo');
+    document.getElementById('tab-ofertas').hidden = tab.dataset.tab !== 'ofertas';
+    document.getElementById('tab-novedades').hidden = tab.dataset.tab !== 'novedades';
+  });
+});
+function renderOfertasAdmin(){
+  document.getElementById('lista-ofertas-admin').innerHTML = state.ofertas.map(o=>`
+    <div class="card-lista">
+      <div><h4>${o.titulo}</h4><p>${o.detalle} · USD ${o.precio}</p></div>
+      <button class="mini-btn peligro" data-borrar-oferta="${o.id}">Quitar</button>
+    </div>`).join('') || '<p style="color:var(--pink-dim);">Sin ofertas cargadas.</p>';
+}
+function renderNovedadesAdmin(){
+  document.getElementById('lista-novedades-admin').innerHTML = state.novedades.map(n=>`
+    <div class="card-lista">
+      <div><h4>${n.titulo}</h4><p>${n.copete}</p></div>
+      <button class="mini-btn peligro" data-borrar-novedad="${n.id}">Quitar</button>
+    </div>`).join('') || '<p style="color:var(--pink-dim);">Sin novedades cargadas.</p>';
+}
+document.getElementById('btn-agregar-oferta').addEventListener('click', ()=>{
+  const titulo = document.getElementById('of-titulo').value.trim();
+  if(!titulo) return mostrarToast('Ingresá un título para la oferta.');
+  state.ofertas.push({id:nuevoId(), titulo, detalle:document.getElementById('of-detalle').value.trim(), precio:Number(document.getElementById('of-precio').value)||0});
+  ['of-titulo','of-detalle','of-precio'].forEach(id=>document.getElementById(id).value='');
+  renderOfertasAdmin(); renderOfertas();
+  mostrarToast('Oferta publicada en la home.');
+});
+document.getElementById('btn-agregar-novedad').addEventListener('click', ()=>{
+  const titulo = document.getElementById('nv-titulo').value.trim();
+  if(!titulo) return mostrarToast('Ingresá un título para la novedad.');
+  state.novedades.unshift({id:nuevoId(), fecha:'hoy', titulo, copete:document.getElementById('nv-copete').value.trim()});
+  ['nv-titulo','nv-copete'].forEach(id=>document.getElementById(id).value='');
+  renderNovedadesAdmin(); renderNovedades();
+  mostrarToast('Novedad publicada.');
+});
+document.getElementById('lista-ofertas-admin').addEventListener('click', e=>{
+  const b = e.target.closest('[data-borrar-oferta]');
+  if(b){ state.ofertas = state.ofertas.filter(o=>o.id!==Number(b.dataset.borrarOferta)); renderOfertasAdmin(); renderOfertas(); }
+});
+document.getElementById('lista-novedades-admin').addEventListener('click', e=>{
+  const b = e.target.closest('[data-borrar-novedad]');
+  if(b){ state.novedades = state.novedades.filter(n=>n.id!==Number(b.dataset.borrarNovedad)); renderNovedadesAdmin(); renderNovedades(); }
+});
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+function iniciar(){
+  renderOfertas();
+  renderFiltroDestinos();
+  renderPaquetes();
+  renderNovedades();
+  renderBadgeMensajes();
+  renderBandeja();
+  renderTablaClientes();
+  renderAgenda();
+  renderTablaPaquetes();
+  renderOfertasAdmin();
+  renderNovedadesAdmin();
+}
+iniciar();
+</script>
+</body>
+</html>
